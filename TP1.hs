@@ -12,9 +12,6 @@ type Distance = Int
 
 type RoadMap = [(City,City,Distance)] -- original version
 
-
-
-
 -- tranforms a list in a list with only unique items
 rmDoubles :: [String] -> [String]
 rmDoubles [] = []
@@ -25,11 +22,12 @@ rmDoubles (h:t)
 -- FUNC1
 -- returns all the cities in the graph
 
+auxcities :: RoadMap -> [City]
+auxcities [] = []
+auxcities ((city1,city2,_):xs) =  city1 : city2 : auxcities xs
 
 cities :: RoadMap -> [City]
-cities [] = []
-cities ((city1,city2,_):xs) =  city1 : city2 : cities xs
-
+cities rm = rmDoubles(auxcities rm)
 -- FUNC 2
 -- returns a boolean indicating whether two cities are linked directly
 areAdjacent :: RoadMap -> City -> City -> Bool
