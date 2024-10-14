@@ -47,9 +47,12 @@ distance ((city1_,city2_,distance_):xs) city1 city2
 adjacent :: RoadMap -> City -> [(City,Distance)]
 adjacent rm city = [(x,y) | (c, x, y) <- rm, c == city] ++ [(x,y) | (x, c, y) <- rm, c == city]
 
+
+-- FUNC 5
+-- returns the sum of all individual distances in a path between two cities in a Just value
+
 pathDistance :: RoadMap -> Path -> Maybe Distance
 pathDistance = undefined
-
 
 --FUNC 6
 -- returns the names of the cities with the
