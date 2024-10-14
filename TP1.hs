@@ -1,6 +1,6 @@
---import qualified Data.List
---import qualified Data.Array
---import qualified Data.Bits
+import qualified Data.List
+import qualified Data.Array
+import qualified Data.Bits
 
 -- PFL 2024/2025 Practical assignment 1
 
@@ -10,13 +10,15 @@ type City = String
 type Path = [City]
 type Distance = Int
 
-type RoadMap = [(City,City,Distance)]
+type RoadMap = [(City,City,Distance)] -- original version
 
 cities :: RoadMap -> [City]
 cities = undefined -- modifiy this line to implement the solution, for each exercise not solved, leave the function definition like this
 
+
+--returns a boolean indicating whether two cities are linked directly
 areAdjacent :: RoadMap -> City -> City -> Bool
-areAdjacent = undefined
+areAdjacent rm c1 c2 = any (\(x, y, d) -> (x==c1 && y==c2) || (x==c2 && y==c1)) rm
 
 distance :: RoadMap -> City -> City -> Maybe Distance
 distance = undefined
