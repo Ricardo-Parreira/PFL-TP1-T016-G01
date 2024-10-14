@@ -17,19 +17,23 @@ type RoadMap = [(City,City,Distance)] -- original version
 getFirstTwo :: (City, City, distance) -> [City]
 getFirstTwo (first, second, _) = [first, second]
 
+
 cities :: RoadMap -> [City]
 cities [] = []
 cities (x:xs) =  getFirstTwo x ++ cities xs
 
--- func2
+--FUNC 2
+--returns a boolean indicating whether two cities are linked directly
 areAdjacent :: RoadMap -> City -> City -> Bool
-areAdjacent rm c1 c2 = any (\(x, y, d) -> (x==c1 && y==c2) || (x==c2 && y==c1)) rm
+areAdjacent rm city1 city2 = any (\(x, y, d) -> (x==city1 && y==city2) || (x==city2 && y==city1)) rm
 
 distance :: RoadMap -> City -> City -> Maybe Distance
 distance = undefined
 
+--FUNC 4
+-- returns the cities adjacent to a particular city (i.e. cities with a direct edge between them) and the respective distances to them
 adjacent :: RoadMap -> City -> [(City,Distance)]
-adjacent = undefined
+adjacent rm city = [(x,y) | (c, x, y) <- rm, c == city] ++ [(x,y) | (x, c, y) <- rm, c == city]
 
 pathDistance :: RoadMap -> Path -> Maybe Distance
 pathDistance = undefined
