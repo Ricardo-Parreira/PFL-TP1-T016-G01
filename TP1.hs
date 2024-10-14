@@ -12,8 +12,8 @@ type Distance = Int
 
 type RoadMap = [(City,City,Distance)] -- original version
 
--- func1
-
+-- FUNC1
+-- returns all the cities in the graph
 getFirstTwo :: (City, City, distance) -> [City]
 getFirstTwo (first, second, _) = [first, second]
 
@@ -22,15 +22,30 @@ cities :: RoadMap -> [City]
 cities [] = []
 cities (x:xs) =  getFirstTwo x ++ cities xs
 
---FUNC 2
---returns a boolean indicating whether two cities are linked directly
+-- FUNC 2
+-- returns a boolean indicating whether two cities are linked directly
 areAdjacent :: RoadMap -> City -> City -> Bool
 areAdjacent rm city1 city2 = any (\(x, y, d) -> (x==city1 && y==city2) || (x==city2 && y==city1)) rm
 
-distance :: RoadMap -> City -> City -> Maybe Distance
-distance = undefined
+-- FUNC 3
+-- returns a just value with the distance between two cities connected directly, given two city names, and Nothing otherwise.
 
---FUNC 4
+getFirst :: (City, City, distance) -> City
+getFirst (first, _, _) = first
+
+getSecond :: (City, City, distance) -> City
+getSecond (_, second, _) = second
+
+getThird :: (City, City, Distance) -> Distance
+getThird (_, _, distance) = distance
+
+distance :: RoadMap -> City -> City -> Maybe Distance
+distance [] _ _ = Nothing
+distance (x:xs) city1 city2 
+    | ((getFirst x == city1 && getSecond x == city2)||(getFirst x == city2 && getSecond x == city1)) = Just (getThird x)
+    | otherwise = distance xs city1 city2
+
+-- FUNC 4
 -- returns the cities adjacent to a particular city (i.e. cities with a direct edge between them) and the respective distances to them
 adjacent :: RoadMap -> City -> [(City,Distance)]
 adjacent rm city = [(x,y) | (c, x, y) <- rm, c == city] ++ [(x,y) | (x, c, y) <- rm, c == city]
