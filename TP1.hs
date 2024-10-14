@@ -12,11 +12,16 @@ type Distance = Int
 
 type RoadMap = [(City,City,Distance)] -- original version
 
+-- func1
+
+getFirstTwo :: (City, City, distance) -> [City]
+getFirstTwo (first, second, _) = [first, second]
+
 cities :: RoadMap -> [City]
-cities = undefined -- modifiy this line to implement the solution, for each exercise not solved, leave the function definition like this
+cities [] = []
+cities (x:xs) =  getFirstTwo x ++ cities xs
 
-
---returns a boolean indicating whether two cities are linked directly
+-- func2
 areAdjacent :: RoadMap -> City -> City -> Bool
 areAdjacent rm c1 c2 = any (\(x, y, d) -> (x==c1 && y==c2) || (x==c2 && y==c1)) rm
 
@@ -53,3 +58,5 @@ gTest2 = [("0","1",10),("0","2",15),("0","3",20),("1","2",35),("1","3",25),("2",
 
 gTest3 :: RoadMap -- unconnected graph
 gTest3 = [("0","1",4),("2","3",2)]
+
+
