@@ -14,13 +14,10 @@ type RoadMap = [(City,City,Distance)] -- original version
 
 -- FUNC1
 -- returns all the cities in the graph
-getFirstTwo :: (City, City, distance) -> [City]
-getFirstTwo (first, second, _) = [first, second]
-
 
 cities :: RoadMap -> [City]
 cities [] = []
-cities (x:xs) =  getFirstTwo x ++ cities xs
+cities ((city1,city2,_):xs) =  city1 : city2 : cities xs
 
 -- FUNC 2
 -- returns a boolean indicating whether two cities are linked directly
@@ -30,19 +27,10 @@ areAdjacent rm city1 city2 = any (\(x, y, d) -> (x==city1 && y==city2) || (x==ci
 -- FUNC 3
 -- returns a just value with the distance between two cities connected directly, given two city names, and Nothing otherwise.
 
-getFirst :: (City, City, distance) -> City
-getFirst (first, _, _) = first
-
-getSecond :: (City, City, distance) -> City
-getSecond (_, second, _) = second
-
-getThird :: (City, City, Distance) -> Distance
-getThird (_, _, distance) = distance
-
 distance :: RoadMap -> City -> City -> Maybe Distance
 distance [] _ _ = Nothing
-distance (x:xs) city1 city2 
-    | ((getFirst x == city1 && getSecond x == city2)||(getFirst x == city2 && getSecond x == city1)) = Just (getThird x)
+distance ((city1_,city2_,distance_):xs) city1 city2 
+    | (city1_ == city1 && city2_ == city2)||(city1_ == city2 && city2_ == city1) = Just (distance_)
     | otherwise = distance xs city1 city2
 
 -- FUNC 4
