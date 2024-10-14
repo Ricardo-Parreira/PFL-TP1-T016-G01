@@ -12,8 +12,19 @@ type Distance = Int
 
 type RoadMap = [(City,City,Distance)] -- original version
 
+
+
+
+-- tranforms a list in a list with only unique items
+rmDoubles :: [String] -> [String]
+rmDoubles [] = []
+rmDoubles (h:t)
+ | notElem h t = h : rmDoubles t 
+ | otherwise = rmDoubles t
+
 -- FUNC1
 -- returns all the cities in the graph
+
 
 cities :: RoadMap -> [City]
 cities [] = []
@@ -41,8 +52,16 @@ adjacent rm city = [(x,y) | (c, x, y) <- rm, c == city] ++ [(x,y) | (x, c, y) <-
 pathDistance :: RoadMap -> Path -> Maybe Distance
 pathDistance = undefined
 
+
+--FUNC 6
+-- returns the names of the cities with the
+--highest number of roads connecting to them (i.e. the vertices with the highest degree) highestDegree
+highestDegree :: RoadMap -> Int
+highestDegree rm = maximum [length (adjacent rm c) | (c,x,y) <- rm] 
+
 rome :: RoadMap -> [City]
-rome = undefined
+rome rm = rmDoubles [city | (city, y, d) <- rm, length (adjacent rm city) == h]
+    where h = highestDegree rm
 
 isStronglyConnected :: RoadMap -> Bool
 isStronglyConnected = undefined
