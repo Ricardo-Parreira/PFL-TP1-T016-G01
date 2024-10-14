@@ -52,9 +52,16 @@ adjacent rm city = [(x,y) | (c, x, y) <- rm, c == city] ++ [(x,y) | (x, c, y) <-
 -- returns the sum of all individual distances in a path between two cities in a Just value
 
 pathDistance :: RoadMap -> Path -> Maybe Distance
-pathDistance = undefined
-
---FUNC 6
+pathDistance _ [] = Just 0  
+pathDistance _ [_] = Just 0  
+pathDistance rm (x:y:xs) =
+    case distance rm x y of
+        Nothing -> Nothing  
+        Just dist -> 
+            case pathDistance rm (y:xs) of
+                Nothing -> Nothing  
+                Just totalDist -> Just (dist + totalDist) 
+-- FUNC 6
 -- returns the names of the cities with the
 --highest number of roads connecting to them (i.e. the vertices with the highest degree) highestDegree
 highestDegree :: RoadMap -> Int
@@ -64,6 +71,8 @@ rome :: RoadMap -> [City]
 rome rm = rmDoubles [city | (city, y, d) <- rm, length (adjacent rm city) == h]
     where h = highestDegree rm
 
+-- Func 7
+-- returns a boolean indicating whether all the cities in the graph are connected in the roadmap
 isStronglyConnected :: RoadMap -> Bool
 isStronglyConnected = undefined
 
