@@ -48,6 +48,7 @@ adjacent :: RoadMap -> City -> [(City,Distance)]
 adjacent rm city = [(x,y) | (c, x, y) <- rm, c == city] ++ [(x,y) | (x, c, y) <- rm, c == city]
 
 
+
 -- FUNC 5
 -- returns the sum of all individual distances in a path between two cities in a Just value
 
@@ -61,6 +62,8 @@ pathDistance rm (x:y:xs) =
             case pathDistance rm (y:xs) of
                 Nothing -> Nothing  
                 Just totalDist -> Just (dist + totalDist) 
+
+
 -- FUNC 6
 -- returns the names of the cities with the
 --highest number of roads connecting to them (i.e. the vertices with the highest degree) highestDegree
@@ -73,8 +76,20 @@ rome rm = rmDoubles [city | (city, y, d) <- rm, length (adjacent rm city) == h]
 
 -- Func 7
 -- returns a boolean indicating whether all the cities in the graph are connected in the roadmap
+
+dfs :: RoadMap -> City -> [City] -> [City]
+dfs rm city visited
+ | city `elem` visited = visited --see if city is already in visited
+ | otherwise = foldl (\acc (nextCity, _) -> dfs rm nextCity acc) (city:visited) (adjacent rm city)
+
 isStronglyConnected :: RoadMap -> Bool
-isStronglyConnected = undefined
+isStronglyConnected [] = True
+isStronglyConnected rm =
+    let cityList = cities rm
+        startCity = head cityList
+        visited = dfs rm startCity []
+    in length visited == length cityList
+
 
 shortestPath :: RoadMap -> City -> City -> [Path]
 shortestPath = undefined
