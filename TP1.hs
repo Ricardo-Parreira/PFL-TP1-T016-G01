@@ -93,7 +93,7 @@ isStronglyConnected rm =
     in length visited == length cityList
 
 
--- converts the RoadMAp into [(City,[(City,Distance)])]
+-- converts the RoadMap into [(City,[(City,Distance)])] (a lisst of tuples with every city and a list of all the adjacent cities to this city. and their distance)
 convert :: RoadMap -> [(City,[(City,Distance)])]
 convert rm = [(city1,adjacent rm city1) | city1 <- cities rm]
 
