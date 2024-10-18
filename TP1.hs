@@ -1,6 +1,7 @@
 import qualified Data.List
 import qualified Data.Array
 import qualified Data.Bits
+import Data.List (nub)
 
 -- PFL 2024/2025 Practical assignment 1
 
@@ -13,6 +14,7 @@ type Distance = Int
 type RoadMap = [(City,City,Distance)] -- original version
 
 -- tranforms a list in a list with only unique items
+-- we made it because we didnt know nub existed
 rmDoubles :: [String] -> [String]
 rmDoubles [] = []
 rmDoubles (h:t)
@@ -27,7 +29,7 @@ auxcities [] = []
 auxcities ((city1,city2,_):xs) =  city1 : city2 : auxcities xs
 
 cities :: RoadMap -> [City]
-cities rm = rmDoubles(auxcities rm)
+cities rm = nub (auxcities rm)
 -- FUNC 2
 -- returns a boolean indicating whether two cities are linked directly
 areAdjacent :: RoadMap -> City -> City -> Bool
@@ -71,7 +73,7 @@ highestDegree :: RoadMap -> Int
 highestDegree rm = maximum [length (adjacent rm c) | (c,x,y) <- rm] 
 
 rome :: RoadMap -> [City]
-rome rm = rmDoubles [city | (city, y, d) <- rm, length (adjacent rm city) == h]
+rome rm = nub [city | (city, y, d) <- rm, length (adjacent rm city) == h]
     where h = highestDegree rm
 
 -- Func 7
@@ -89,6 +91,11 @@ isStronglyConnected rm =
         startCity = head cityList
         visited = dfs rm startCity []
     in length visited == length cityList
+
+
+-- converts the RoadMAp into [(City,[(City,Distance)])]
+convert :: RoadMap -> [(City,[(City,Distance)])]
+convert rm = [(city1,adjacent rm city1) | city1 <- cities rm]
 
 
 shortestPath :: RoadMap -> City -> City -> [Path]
