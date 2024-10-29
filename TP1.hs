@@ -12,6 +12,7 @@ type Path = [City]
 type Distance = Int
 
 type RoadMap = [(City,City,Distance)] -- original version
+type AdjList = [(City,[(City,Distance)])]
 
 -- tranforms a list in a list with only unique items
 -- we made it because we didnt know nub existed
@@ -76,7 +77,7 @@ rome :: RoadMap -> [City]
 rome rm = nub [city | (city, y, d) <- rm, length (adjacent rm city) == h]
     where h = highestDegree rm
 
--- Func 7
+-- FUNC 7
 -- returns a boolean indicating whether all the cities in the graph are connected in the roadmap
 
 dfs :: RoadMap -> City -> [City] -> [City]
@@ -92,14 +93,47 @@ isStronglyConnected rm =
         visited = dfs rm startCity []
     in length visited == length cityList
 
-
+-- FUNC 8
 -- converts the RoadMap into [(City,[(City,Distance)])] (a lisst of tuples with every city and a list of all the adjacent cities to this city. and their distance)
 convert :: RoadMap -> [(City,[(City,Distance)])]
 convert rm = [(city1,adjacent rm city1) | city1 <- cities rm]
 
 
-shortestPath :: RoadMap -> City -> City -> [Path]
-shortestPath = undefined
+shortestPath :: RoadMap -> City -> City -> Maybe Path
+shortestPath rm start end
+    | start == end = Just [start]
+    | otherwise =
+        let adjList = convert rm
+            -- Initial queue: [(city, cumulative distance, path)]
+            initialQueue = [(start, 0, [start])]
+            visited = []  -- List to keep track of visited cities
+            bfs [] _ = Nothing  -- No path found
+            bfs queue visited
+                | null queue = Nothing  -- End of queue
+                | otherwise =
+                    let (currentCity, currentDist, currentPath) = head queue
+                        restQueue = tail queue
+                    in if currentCity == end
+                       then Just currentPath  -- Found the path
+                       else if currentCity `elem` visited
+                            then bfs restQueue visited  -- Skip visited
+                            else
+                                let neighbors = getNeighbors adjList currentCity
+                                    updatedQueue = foldl (updateQueue currentDist currentPath) restQueue neighbors
+                                in bfs (restQueue ++ updatedQueue) (currentCity : visited)  -- Add to visited
+            -- Helper to update the queue with new paths and distances
+            updateQueue currentDist currentPath q (neighbor, dist) =
+                let newDist = currentDist + dist
+                    newPath = currentPath ++ [neighbor]
+                in (neighbor, newDist, newPath) : filter (\(c, _, _) -> c /= neighbor) q  -- Update queue
+
+        in bfs initialQueue visited
+
+-- Helper to get neighbors from adjacency list
+getNeighbors :: AdjList -> City -> [(City, Distance)]
+getNeighbors adjList city = case lookup city adjList of
+    Just neighbors -> neighbors
+    Nothing -> []
 
 travelSales :: RoadMap -> Path
 travelSales = undefined
@@ -117,4 +151,34 @@ gTest2 = [("0","1",10),("0","2",15),("0","3",20),("1","2",35),("1","3",25),("2",
 gTest3 :: RoadMap -- unconnected graph
 gTest3 = [("0","1",4),("2","3",2)]
 
+main :: IO ()
+main = do
+    -- Test with gTest1
+    putStrLn "Testing gTest1:"
+    printTestResult (shortestPath gTest1 "7" "5")  -- Expected: Just ["7","6","5"]
+    printTestResult (shortestPath gTest1 "0" "4")  -- Expected: Just ["0","1","2","5","4"]
+    printTestResult (shortestPath gTest1 "8" "3")  -- Expected: Just ["8","6","5","4","3"]
+    printTestResult (shortestPath gTest1 "1" "3")  -- Expected: Just ["1","2","3"]
+    printTestResult (shortestPath gTest1 "0" "8")  -- Expected: Just ["0","7","8"]
+    printTestResult (shortestPath gTest1 "2" "7")  -- Expected: Just ["2","5","4","3","2","7"] (If any path exists)
+    putStrLn ""
+
+    -- Test with gTest2
+    putStrLn "Testing gTest2:"
+    printTestResult (shortestPath gTest2 "0" "3")  -- Expected: Just ["0","1","3"] or ["0","2","3"]
+    printTestResult (shortestPath gTest2 "1" "2")  -- Expected: Just ["1","2"]
+    printTestResult (shortestPath gTest2 "2" "0")  -- Expected: Nothing (if there's no path from 2 to 0)
+    putStrLn ""
+
+    -- Test with gTest3
+    putStrLn "Testing gTest3 (Unconnected graph):"
+    printTestResult (shortestPath gTest3 "0" "3")  -- Expected: Nothing (since 0 and 3 are disconnected)
+    printTestResult (shortestPath gTest3 "0" "1")  -- Expected: Just ["0","1"]
+    printTestResult (shortestPath gTest3 "2" "3")  -- Expected: Just ["2","3"]
+
+-- Helper function to print the results
+printTestResult :: Maybe Path -> IO ()
+printTestResult result = case result of
+    Just path -> putStrLn $ "Found path: " ++ show path
+    Nothing -> putStrLn "No path found."
 
