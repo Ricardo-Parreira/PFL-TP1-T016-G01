@@ -104,32 +104,29 @@ shortestPath rm start end
     | start == end = Just [start]
     | otherwise =
         let adjList = convert rm
-            -- Initial queue: [(city, cumulative distance, path)]
             initialQueue = [(start, 0, [start])]
-            visited = []  -- List to keep track of visited cities
-            bfs [] _ = Nothing  -- No path found
+            visited = []  
+            bfs [] _ = Nothing 
             bfs queue visited
-                | null queue = Nothing  -- End of queue
+                | null queue = Nothing  
                 | otherwise =
                     let (currentCity, currentDist, currentPath) = head queue
                         restQueue = tail queue
                     in if currentCity == end
-                       then Just currentPath  -- Found the path
+                       then Just currentPath 
                        else if currentCity `elem` visited
-                            then bfs restQueue visited  -- Skip visited
+                            then bfs restQueue visited 
                             else
                                 let neighbors = getNeighbors adjList currentCity
                                     updatedQueue = foldl (updateQueue currentDist currentPath) restQueue neighbors
-                                in bfs (restQueue ++ updatedQueue) (currentCity : visited)  -- Add to visited
-            -- Helper to update the queue with new paths and distances
+                                in bfs (restQueue ++ updatedQueue) (currentCity : visited) 
             updateQueue currentDist currentPath q (neighbor, dist) =
                 let newDist = currentDist + dist
                     newPath = currentPath ++ [neighbor]
-                in (neighbor, newDist, newPath) : filter (\(c, _, _) -> c /= neighbor) q  -- Update queue
+                in (neighbor, newDist, newPath) : filter (\(c, _, _) -> c /= neighbor) q  
 
         in bfs initialQueue visited
 
--- Helper to get neighbors from adjacency list
 getNeighbors :: AdjList -> City -> [(City, Distance)]
 getNeighbors adjList city = case lookup city adjList of
     Just neighbors -> neighbors
