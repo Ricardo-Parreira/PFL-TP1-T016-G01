@@ -19,18 +19,14 @@ type AdjList = [(City,[(City,Distance)])]
 rmDoubles :: [String] -> [String]
 rmDoubles [] = []
 rmDoubles (h:t)
- | notElem h t = h : rmDoubles t 
+ | notElem h t = h : rmDoubles t
  | otherwise = rmDoubles t
 
 -- FUNC1
 -- returns all the cities in the graph
 
-auxcities :: RoadMap -> [City]
-auxcities [] = []
-auxcities ((city1,city2,_):xs) =  city1 : city2 : auxcities xs
-
 cities :: RoadMap -> [City]
-cities rm = nub (auxcities rm)
+cities rm = nub ( [city1 | (city1, _, _) <- rm] ++ [city2 | (_, city2, _) <- rm])
 -- FUNC 2
 -- returns a boolean indicating whether two cities are linked directly
 areAdjacent :: RoadMap -> City -> City -> Bool
@@ -41,7 +37,7 @@ areAdjacent rm city1 city2 = any (\(x, y, d) -> (x==city1 && y==city2) || (x==ci
 
 distance :: RoadMap -> City -> City -> Maybe Distance
 distance [] _ _ = Nothing
-distance ((city1_,city2_,distance_):xs) city1 city2 
+distance ((city1_,city2_,distance_):xs) city1 city2
     | (city1_ == city1 && city2_ == city2)||(city1_ == city2 && city2_ == city1) = Just (distance_)
     | otherwise = distance xs city1 city2
 
@@ -56,22 +52,22 @@ adjacent rm city = [(x,y) | (c, x, y) <- rm, c == city] ++ [(x,y) | (x, c, y) <-
 -- returns the sum of all individual distances in a path between two cities in a Just value
 
 pathDistance :: RoadMap -> Path -> Maybe Distance
-pathDistance _ [] = Just 0  
-pathDistance _ [_] = Just 0  
+pathDistance _ [] = Just 0
+pathDistance _ [_] = Just 0
 pathDistance rm (x:y:xs) =
     case distance rm x y of
-        Nothing -> Nothing  
-        Just dist -> 
+        Nothing -> Nothing
+        Just dist ->
             case pathDistance rm (y:xs) of
-                Nothing -> Nothing  
-                Just totalDist -> Just (dist + totalDist) 
+                Nothing -> Nothing
+                Just totalDist -> Just (dist + totalDist)
 
 
 -- FUNC 6
 -- returns the names of the cities with the
 --highest number of roads connecting to them (i.e. the vertices with the highest degree) highestDegree
 highestDegree :: RoadMap -> Int
-highestDegree rm = maximum [length (adjacent rm c) | (c,x,y) <- rm] 
+highestDegree rm = maximum [length (adjacent rm c) | (c,x,y) <- rm]
 
 rome :: RoadMap -> [City]
 rome rm = nub [city | (city, y, d) <- rm, length (adjacent rm city) == h]
@@ -99,38 +95,47 @@ convert :: RoadMap -> [(City,[(City,Distance)])]
 convert rm = [(city1,adjacent rm city1) | city1 <- cities rm]
 
 
-shortestPath :: RoadMap -> City -> City -> Maybe Path
-shortestPath rm start end
-    | start == end = Just [start]
-    | otherwise =
-        let adjList = convert rm
-            initialQueue = [(start, 0, [start])]
-            visited = []  
-            bfs [] _ = Nothing 
-            bfs queue visited
-                | null queue = Nothing  
-                | otherwise =
-                    let (currentCity, currentDist, currentPath) = head queue
-                        restQueue = tail queue
-                    in if currentCity == end
-                       then Just currentPath 
-                       else if currentCity `elem` visited
-                            then bfs restQueue visited 
-                            else
-                                let neighbors = getNeighbors adjList currentCity
-                                    updatedQueue = foldl (updateQueue currentDist currentPath) restQueue neighbors
-                                in bfs (restQueue ++ updatedQueue) (currentCity : visited) 
-            updateQueue currentDist currentPath q (neighbor, dist) =
-                let newDist = currentDist + dist
-                    newPath = currentPath ++ [neighbor]
-                in (neighbor, newDist, newPath) : filter (\(c, _, _) -> c /= neighbor) q  
-
-        in bfs initialQueue visited
-
 getNeighbors :: AdjList -> City -> [(City, Distance)]
 getNeighbors adjList city = case lookup city adjList of
     Just neighbors -> neighbors
     Nothing -> []
+
+-- Shortest Paths function to return all paths with minimum distance
+shortestPath :: RoadMap -> City -> City -> [Path]
+shortestPath rm start end
+    | start == end = [[start]]
+    | otherwise =
+        let adjList = convert rm
+            initialQueue = [(start, 0, [start])]
+            visited = []
+            bfs [] _ paths _ = nub paths
+            bfs queue visited paths minDist
+                | null queue =  nub paths
+                | otherwise =
+                    let (currentCity, currentDist, currentPath) = head queue
+                        restQueue = tail queue
+                    in if currentCity == end
+                       then
+                           -- If we reach the end, check if we have the minimum path
+                           let newPaths
+                                 | currentDist == minDist = currentPath : paths
+                                 | currentDist < minDist = [currentPath]
+                                 | otherwise = paths
+                           in bfs restQueue visited newPaths (min minDist currentDist)
+                       else if currentCity `elem` visited
+                            then bfs restQueue visited paths minDist
+                            else
+                                let neighbors = getNeighbors adjList currentCity
+                                    updatedQueue = foldl (updateQueue currentDist currentPath) restQueue neighbors
+                                in bfs (restQueue ++ updatedQueue) (currentCity : visited) paths minDist
+
+            -- Update queue and add path if the current path is shortest or equal to the shortest
+            updateQueue currentDist currentPath q (neighbor, dist) =
+                let newDist = currentDist + dist
+                    newPath = currentPath ++ [neighbor]
+                in (neighbor, newDist, newPath) : filter (\(c, _, _) -> c /= neighbor) q
+
+        in bfs initialQueue visited [] maxBound
 
 travelSales :: RoadMap -> Path
 travelSales = undefined
@@ -148,34 +153,31 @@ gTest2 = [("0","1",10),("0","2",15),("0","3",20),("1","2",35),("1","3",25),("2",
 gTest3 :: RoadMap -- unconnected graph
 gTest3 = [("0","1",4),("2","3",2)]
 
-main :: IO ()
-main = do
-    -- Test with gTest1
-    putStrLn "Testing gTest1:"
-    printTestResult (shortestPath gTest1 "7" "5")  -- Expected: Just ["7","6","5"]
-    printTestResult (shortestPath gTest1 "0" "4")  -- Expected: Just ["0","1","2","5","4"]
-    printTestResult (shortestPath gTest1 "8" "3")  -- Expected: Just ["8","6","5","4","3"]
-    printTestResult (shortestPath gTest1 "1" "3")  -- Expected: Just ["1","2","3"]
-    printTestResult (shortestPath gTest1 "0" "8")  -- Expected: Just ["0","7","8"]
-    printTestResult (shortestPath gTest1 "2" "7")  -- Expected: Just ["2","5","4","3","2","7"] (If any path exists)
-    putStrLn ""
+gTest4 :: RoadMap
+gTest4 = [("0", "1", 1), ("1", "3", 1), ("2", "3",1),("0","2",1)]
 
-    -- Test with gTest2
-    putStrLn "Testing gTest2:"
-    printTestResult (shortestPath gTest2 "0" "3")  -- Expected: Just ["0","1","3"] or ["0","2","3"]
-    printTestResult (shortestPath gTest2 "1" "2")  -- Expected: Just ["1","2"]
-    printTestResult (shortestPath gTest2 "2" "0")  -- Expected: Nothing (if there's no path from 2 to 0)
-    putStrLn ""
+-- Test with gTest1
+-- Expected: Shortest path(s) between each city pair (if connected)
+test1_1 = shortestPath gTest1 "0" "5"  -- Path from "0" to "5", expected result(s): [["0","7","6","5"], ["0","1","2","5"]]
+test1_2 = shortestPath gTest1 "7" "4"  -- Path from "7" to "4", expected result(s): [["7","6","5","4"], ["7","8","2","3","4"]]
+test1_3 = shortestPath gTest1 "8" "3"  -- Path from "8" to "3", expected result(s): [["8","2","3"]]
+test1_4 = shortestPath gTest1 "1" "3"  -- Path from "1" to "3", expected result(s): [["1","2","3"]]
+test1_5 = shortestPath gTest1 "0" "8"  -- Path from "0" to "8", expected result(s): [["0","7","8"]]
 
-    -- Test with gTest3
-    putStrLn "Testing gTest3 (Unconnected graph):"
-    printTestResult (shortestPath gTest3 "0" "3")  -- Expected: Nothing (since 0 and 3 are disconnected)
-    printTestResult (shortestPath gTest3 "0" "1")  -- Expected: Just ["0","1"]
-    printTestResult (shortestPath gTest3 "2" "3")  -- Expected: Just ["2","3"]
+-- Test with gTest2
+-- Expected: Shortest path(s) between each city pair (if connected)
+test2_1 = shortestPath gTest2 "0" "3"  -- Path from "0" to "3", expected result(s): [["0","3"]]
+test2_2 = shortestPath gTest2 "1" "2"  -- Path from "1" to "2", expected result(s): [["1","2"]]
+test2_3 = shortestPath gTest2 "2" "0"  -- Path from "2" to "0", expected result(s): [["2","0"]]
 
--- Helper function to print the results
-printTestResult :: Maybe Path -> IO ()
-printTestResult result = case result of
-    Just path -> putStrLn $ "Found path: " ++ show path
-    Nothing -> putStrLn "No path found."
+-- Test with gTest3 (Unconnected graph)
+-- Expected: Shortest path(s) for only reachable cities
+test3_1 = shortestPath gTest3 "0" "1"  -- Path from "0" to "1", expected result(s): [["0","1"]]
+test3_2 = shortestPath gTest3 "2" "3"  -- Path from "2" to "3", expected result(s): [["2","3"]]
+test3_3 = shortestPath gTest3 "0" "3"  -- Path from "0" to "3", expected result: [] (no path exists)
 
+-- Test with gTest4
+-- Expected: Shortest path(s) between each city pair (if connected)
+test4_1 = shortestPath gTest4 "0" "3"  -- Path from "0" to "3", expected result(s): [["0","1","3"], ["0","2","3"]]
+test4_2 = shortestPath gTest4 "1" "2"  -- Path from "1" to "2", expected result(s): [["1","3","2"]]
+test4_3 = shortestPath gTest4 "0" "1"  -- Path from "0" to "1", expected result(s): [["0","1"]]
