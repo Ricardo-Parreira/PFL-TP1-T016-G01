@@ -2,6 +2,8 @@ import qualified Data.List
 import qualified Data.Array
 import qualified Data.Bits
 import Data.List (nub)
+import Data.List (minimumBy)
+import GHCi.Message (THMessage(AddCorePlugin))
 
 -- PFL 2024/2025 Practical assignment 1
 
@@ -136,9 +138,24 @@ shortestPath rm start end
                 in (neighbor, newDist, newPath) : filter (\(c, _, _) -> c /= neighbor) q
 
         in bfs initialQueue visited [] maxBound
+--FUNC 9
+-- returns a solution of the Traveling Salesman Problem (TSP).
+nearestNeighbor :: City -> [City] -> Path -> AdjList -> Path
+nearestNeighbor currentCity unvisited path adjList
+            | null unvisited = path ++ [head path]  -- Return to the start at the end
+            | otherwise =
+                let neighbors = getNeighbors adjList currentCity
+                    -- Filter neighbors to only those in unvisited
+                    validNeighbors = filter (\(c, _) -> c `elem` unvisited) neighbors
+                    -- Find the nearest unvisited neighbor
+                    (nextCity, _) = minimumBy (\(_, d1) (_, d2) -> compare d1 d2) validNeighbors
+                in nearestNeighbor nextCity (filter (/= nextCity) unvisited) (path ++ [nextCity]) adjList
 
 travelSales :: RoadMap -> Path
-travelSales = undefined
+travelSales rm =
+    let adjList = convert rm
+        startCity = head (cities rm)       
+    in nearestNeighbor startCity (filter (/= startCity) (cities rm)) [startCity] adjList
 
 tspBruteForce :: RoadMap -> Path
 tspBruteForce = undefined -- only for groups of 3 people; groups of 2 people: do not edit this function
