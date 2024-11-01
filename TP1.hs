@@ -153,12 +153,16 @@ findNearestNeighbor adjList currentCity unvisited =
 -- Nearest neighbor algorithm to find the path
 nearestNeighbor :: AdjList -> City -> [City] -> Path -> Path
 nearestNeighbor adjList currentCity unvisited path
-    | null unvisited = path ++ [head path]  -- Return to starting city if all visited
+    | null unvisited =
+        case lookup (head path) (getNeighbors adjList currentCity) of
+            Nothing -> []  -- If there's no path back to start, return an empty path
+            Just _  -> path ++ [head path]  -- Otherwise, return to start to complete the tour
     | otherwise =
         case findNearestNeighbor adjList currentCity unvisited of
-            Nothing -> path  -- Terminate if no valid neighbor and cities are left unvisited
+            Nothing -> []  -- If no valid neighbor is found, return an empty path (no valid TSP path)
             Just (nextCity, _) ->
                 nearestNeighbor adjList nextCity (filter (/= nextCity) unvisited) (path ++ [nextCity])
+
 
 -- TSP function using the nearest neighbor approach
 travelSales :: RoadMap -> Path
@@ -187,6 +191,31 @@ gTest3 = [("0","1",4),("2","3",2)]
 
 gTest4 :: RoadMap
 gTest4 = [("0", "1", 1), ("1", "3", 1), ("2", "3",1),("0","2",1)]
+
+gTest5 :: RoadMap
+gTest5 = [("A", "B", 5), ("A", "C", 10), ("A", "D", 8),
+          ("B", "C", 3), ("B", "D", 7),
+          ("C", "D", 2)]
+
+gTest6 :: RoadMap
+gTest6 = [("X", "Y", 2), ("Y", "Z", 3), ("Z", "W", 4), ("W", "X", 5)]
+
+gTest7 :: RoadMap
+gTest7 = [("1", "2", 4), ("1", "3", 6), ("1", "4", 8), ("2", "3", 2),
+          ("2", "4", 3), ("3", "5", 5), ("4", "5", 7), ("3", "6", 4),
+          ("5", "6", 1), ("4", "6", 6)]
+
+gTest8 :: RoadMap
+gTest8 = [("M", "N", 5), ("N", "O", 10), ("O", "M", 6),  -- First subgraph
+          ("P", "Q", 3), ("Q", "R", 4), ("R", "P", 2)]   -- Second subgraph
+
+gTest9 :: RoadMap
+gTest9 = [("A", "B", 3), ("A", "C", 2), ("B", "C", 1),
+          ("C", "D", 4), ("B", "D", 6), ("A", "D", 5)]
+
+gTest10 :: RoadMap
+gTest10 = [("1", "2", 2), ("2", "3", 2), ("3", "4", 2), ("4", "5", 2)]
+
 
 -- Test with gTest1
 -- Expected: Shortest path(s) between each city pair (if connected)
