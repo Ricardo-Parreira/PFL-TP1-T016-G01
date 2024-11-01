@@ -140,22 +140,37 @@ shortestPath rm start end
         in bfs initialQueue visited [] maxBound
 --FUNC 9
 -- returns a solution of the Traveling Salesman Problem (TSP).
-nearestNeighbor :: City -> [City] -> Path -> AdjList -> Path
-nearestNeighbor currentCity unvisited path adjList
-            | null unvisited = path ++ [head path]  -- Return to the start at the end
-            | otherwise =
-                let neighbors = getNeighbors adjList currentCity
-                    -- Filter neighbors to only those in unvisited
-                    validNeighbors = filter (\(c, _) -> c `elem` unvisited) neighbors
-                    -- Find the nearest unvisited neighbor
-                    (nextCity, _) = minimumBy (\(_, d1) (_, d2) -> compare d1 d2) validNeighbors
-                in nearestNeighbor nextCity (filter (/= nextCity) unvisited) (path ++ [nextCity]) adjList
 
+-- Finds the nearest unvisited neighbor from the current city
+findNearestNeighbor :: AdjList -> City -> [City] -> Maybe (City, Distance)
+findNearestNeighbor adjList currentCity unvisited =
+    let neighbors = getNeighbors adjList currentCity
+        validNeighbors = filter (\(c, _) -> c `elem` unvisited) neighbors
+    in if null validNeighbors
+       then Nothing
+       else Just (minimumBy (\(_, d1) (_, d2) -> compare d1 d2) validNeighbors)
+
+-- Nearest neighbor algorithm to find the path
+nearestNeighbor :: AdjList -> City -> [City] -> Path -> Path
+nearestNeighbor adjList currentCity unvisited path
+    | null unvisited = path ++ [head path]  -- Return to starting city if all visited
+    | otherwise =
+        case findNearestNeighbor adjList currentCity unvisited of
+            Nothing -> path  -- Terminate if no valid neighbor and cities are left unvisited
+            Just (nextCity, _) ->
+                nearestNeighbor adjList nextCity (filter (/= nextCity) unvisited) (path ++ [nextCity])
+
+-- TSP function using the nearest neighbor approach
 travelSales :: RoadMap -> Path
 travelSales rm =
     let adjList = convert rm
-        startCity = head (cities rm)       
-    in nearestNeighbor startCity (filter (/= startCity) (cities rm)) [startCity] adjList
+        startCity = head (cities rm)
+        allCities = cities rm
+        path = nearestNeighbor adjList startCity (filter (/= startCity) allCities) [startCity]
+    in if length path == length allCities + 1 && last path == startCity
+       then path
+       else []
+
 
 tspBruteForce :: RoadMap -> Path
 tspBruteForce = undefined -- only for groups of 3 people; groups of 2 people: do not edit this function
