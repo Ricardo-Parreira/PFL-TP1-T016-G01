@@ -1,9 +1,6 @@
 import qualified Data.List
 import qualified Data.Array
 import qualified Data.Bits
-import Data.List (nub)
-import Data.List (minimumBy)
-import GHCi.Message (THMessage(AddCorePlugin))
 
 -- PFL 2024/2025 Practical assignment 1
 
@@ -13,7 +10,7 @@ type City = String
 type Path = [City]
 type Distance = Int
 
-type RoadMap = [(City,City,Distance)] -- original version
+type RoadMap = [(City,City,Distance)] 
 type AdjList = [(City,[(City,Distance)])]
 
 -- tranforms a list in a list with only unique items
@@ -28,9 +25,11 @@ rmDoubles (h:t)
 -- returns all the cities in the graph
 
 cities :: RoadMap -> [City]
-cities rm = nub ( [city1 | (city1, _, _) <- rm] ++ [city2 | (_, city2, _) <- rm])
+cities rm = Data.List.nub ( [city1 | (city1, _, _) <- rm] ++ [city2 | (_, city2, _) <- rm])
+
 -- FUNC 2
 -- returns a boolean indicating whether two cities are linked directly
+
 areAdjacent :: RoadMap -> City -> City -> Bool
 areAdjacent rm city1 city2 = any (\(x, y, d) -> (x==city1 && y==city2) || (x==city2 && y==city1)) rm
 
@@ -45,6 +44,7 @@ distance ((city1_,city2_,distance_):xs) city1 city2
 
 -- FUNC 4
 -- returns the cities adjacent to a particular city (i.e. cities with a direct edge between them) and the respective distances to them
+
 adjacent :: RoadMap -> City -> [(City,Distance)]
 adjacent rm city = [(x,y) | (c, x, y) <- rm, c == city] ++ [(x,y) | (x, c, y) <- rm, c == city]
 
@@ -68,11 +68,12 @@ pathDistance rm (x:y:xs) =
 -- FUNC 6
 -- returns the names of the cities with the
 --highest number of roads connecting to them (i.e. the vertices with the highest degree) highestDegree
+
 highestDegree :: RoadMap -> Int
 highestDegree rm = maximum [length (adjacent rm c) | (c,x,y) <- rm]
 
 rome :: RoadMap -> [City]
-rome rm = nub [city | (city, y, d) <- rm, length (adjacent rm city) == h]
+rome rm = Data.List.nub [city | (city, y, d) <- rm, length (adjacent rm city) == h]
     where h = highestDegree rm
 
 -- FUNC 7
@@ -110,9 +111,9 @@ shortestPath rm start end
         let adjList = convert rm
             initialQueue = [(start, 0, [start])]
             visited = []
-            bfs [] _ paths _ = nub paths
+            bfs [] _ paths _ = Data.List.nub paths
             bfs queue visited paths minDist
-                | null queue =  nub paths
+                | null queue =  Data.List.nub paths
                 | otherwise =
                     let (currentCity, currentDist, currentPath) = head queue
                         restQueue = tail queue
@@ -138,6 +139,7 @@ shortestPath rm start end
                 in (neighbor, newDist, newPath) : filter (\(c, _, _) -> c /= neighbor) q
 
         in bfs initialQueue visited [] maxBound
+        
 --FUNC 9
 -- returns a solution of the Traveling Salesman Problem (TSP).
 
@@ -148,7 +150,7 @@ findNearestNeighbor adjList currentCity unvisited =
         validNeighbors = filter (\(c, _) -> c `elem` unvisited) neighbors
     in if null validNeighbors
        then Nothing
-       else Just (minimumBy (\(_, d1) (_, d2) -> compare d1 d2) validNeighbors)
+       else Just (Data.List.minimumBy (\(_, d1) (_, d2) -> compare d1 d2) validNeighbors)
 
 -- Nearest neighbor algorithm to find the path
 nearestNeighbor :: AdjList -> City -> [City] -> Path -> Path
