@@ -13,14 +13,6 @@ type Distance = Int
 type RoadMap = [(City,City,Distance)] 
 type AdjList = [(City,[(City,Distance)])]
 
--- tranforms a list in a list with only unique items
--- we made it because we didnt know nub existed
-rmDoubles :: [String] -> [String]
-rmDoubles [] = []
-rmDoubles (h:t)
- | notElem h t = h : rmDoubles t
- | otherwise = rmDoubles t
-
 -- FUNC1
 -- returns all the cities in the graph
 
