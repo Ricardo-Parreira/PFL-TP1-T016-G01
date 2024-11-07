@@ -182,3 +182,45 @@ gTest2 = [("0","1",10),("0","2",15),("0","3",20),("1","2",35),("1","3",25),("2",
 
 gTest3 :: RoadMap -- unconnected graph
 gTest3 = [("0","1",4),("2","3",2)]
+
+multiPathGraph :: RoadMap
+multiPathGraph = [("A", "B", 2), ("B", "D", 3), ("A", "C", 2), ("C", "D", 3)]
+
+complexGraph :: RoadMap
+complexGraph = [("A", "B", 1), ("B", "C", 2), ("A", "D", 4), ("C", "D", 1), ("B", "D", 3)]
+
+largeGraph :: RoadMap
+largeGraph = [("A", "B", 7),  ("A", "C", 9),  ("A", "F", 14),
+              ("B", "C", 10), ("B", "D", 15),
+              ("C", "D", 11), ("C", "F", 2),
+              ("D", "E", 6),
+              ("E", "F", 9),  ("E", "G", 3),
+              ("F", "H", 8),  ("H", "I", 7),  ("I", "J", 5),
+              ("H", "G", 4),  ("G", "J", 2),  ("J", "K", 1),
+              ("K", "L", 3),  ("L", "M", 6),  ("M", "N", 4),
+              ("N", "O", 5),  ("O", "P", 8),  ("P", "Q", 7),
+              ("Q", "R", 6),  ("R", "S", 4),  ("S", "T", 5),
+              ("T", "U", 3),  ("U", "V", 4),  ("V", "W", 9),
+              ("W", "X", 7),  ("X", "Y", 2),  ("Y", "Z", 5),
+              ("Z", "A", 10)]
+
+
+hexagonGraph :: RoadMap --loop
+hexagonGraph = [("A", "B", 3), ("B", "C", 3), ("C", "D", 3), ("D", "E", 3), ("E", "F", 3), ("F", "A", 3)]
+
+crossGraph :: RoadMap --branchGraph
+crossGraph = [("A", "B", 2), ("A", "C", 2), ("A", "D", 2), ("A", "E", 2), ("B", "C", 3), ("C", "D", 3), ("D", "E", 3), ("E", "B", 3)]
+
+complex1Graph :: RoadMap
+complex1Graph = [("A", "B", 6),  ("A", "C", 2),  ("A", "D", 10),
+                ("B", "C", 4),  ("B", "E", 5),
+                ("C", "D", 8),  ("C", "F", 6),
+                ("D", "G", 7),  ("E", "F", 3),
+                ("F", "G", 1),  ("G", "H", 4),
+                ("H", "I", 5),  ("I", "J", 7),
+                ("J", "D", 9)]
+
+disconnectedGraph :: RoadMap --disconnected
+disconnectedGraph = [("A", "B", 3), ("B", "C", 4), ("D", "E", 2), ("E", "F", 3)]
+
+
